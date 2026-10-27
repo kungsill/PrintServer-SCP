@@ -1,0 +1,20 @@
+[Unit]
+Description=SCPPrint privileged queue cancellation
+After=cups.service
+Requires=cups.service
+
+[Service]
+User=root
+ExecStart=/usr/bin/python3 /opt/scpprint/queue_control.py
+StandardInput=socket
+StandardOutput=socket
+StandardError=journal
+TimeoutStartSec=40
+RuntimeMaxSec=40
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+RestrictAddressFamilies=AF_UNIX
+CapabilityBoundingSet=
+UMask=0077

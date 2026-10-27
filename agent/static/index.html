@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SCPPrint · Armbian Print Server</title>
+  <link rel="stylesheet" href="/static/dashboard.css">
+  <script src="/static/dashboard.js" defer></script>
+</head>
+<body>
+<main>
+  <header><div><span class="eyebrow">ARMBIAN / PRINT SERVER</span><h1>SCPPrint<span class="dot">.</span></h1><p>จัดการงานพิมพ์และตรวจอุปกรณ์ USB ในวงแลน</p></div><span id="connection" class="badge">ยังไม่ได้เชื่อมต่อ</span></header>
+  <section class="panel connection-panel" aria-labelledby="login-title">
+    <div><h2 id="login-title">เชื่อมต่อ Agent</h2><p>ใช้โทเคนจาก <code>/etc/scpprint/api.env</code> บนกล่อง โทเคนจะเก็บในหน่วยความจำของหน้านี้เท่านั้น</p></div>
+    <form id="login-form"><label for="token">Bearer token</label><div class="inline"><input id="token" type="password" autocomplete="off" spellcheck="false" required placeholder="วาง SCPPRINT_TOKEN"><button type="submit">เชื่อมต่อ</button><button type="button" id="logout" class="secondary">ออก</button></div></form>
+  </section>
+  <div id="notice" role="status" aria-live="polite">เชื่อมต่อเพื่อดูสถานะและส่งงานพิมพ์</div>
+  <section class="metrics" aria-label="ภาพรวม">
+    <article><span>CUPS SCHEDULER</span><strong id="cups-state">—</strong><small>บริการรับงานพิมพ์</small></article>
+    <article><span>PRINT QUEUES</span><strong id="queue-count">—</strong><small>คิวที่ตั้งค่าไว้</small></article>
+    <article><span>PENDING JOBS</span><strong id="job-count">—</strong><small>งานที่ยังไม่เสร็จ</small></article>
+    <article><span>USB DEVICES</span><strong id="usb-count">—</strong><small>อุปกรณ์ทั้งหมด รวม USB hub</small></article>
+  </section>
+  <section class="panel"><div class="section-heading"><div><h2>เครื่องพิมพ์</h2><p>แสดงคิว CUPS; ป้าย USB บอกชนิดคิว โปรดดูรายการอุปกรณ์ด้านล่างประกอบ</p></div><button id="refresh" class="secondary" type="button">รีเฟรช</button></div><div id="printers" class="printer-list"><p class="muted">ยังไม่มีข้อมูล</p></div><small id="updated" class="muted">อัปเดตอัตโนมัติทุก 15 วินาทีหลังเชื่อมต่อ</small></section>
+  <div class="columns">
+    <section class="panel"><h2>ส่งงานพิมพ์</h2><p>PDF จะแปลงผ่านไดรเวอร์บนเซิร์ฟเวอร์ ลูกข่ายไม่ต้องติดตั้งไดรเวอร์</p>
+      <form id="print-form"><label for="printer">คิวพิมพ์</label><select id="printer" required><option value="">เชื่อมต่อก่อนใช้งาน</option></select>
+      <div class="form-grid"><div><label for="format">รูปแบบไฟล์</label><select id="format"><option value="pdf">PDF</option><option value="raw">RAW (printer-ready)</option></select></div><div><label for="copies">จำนวนสำเนา</label><input id="copies" type="number" min="1" max="100" value="1" required></div></div>
+      <label for="file">ไฟล์ที่ต้องการพิมพ์</label><input id="file" type="file" accept="application/pdf,.pdf" required>
+      <label class="checkbox"><input id="duplex" type="checkbox"> พิมพ์สองหน้า (ถ้าเครื่องรองรับ)</label>
+      <p id="upload-limit" class="muted">จำกัดขนาดไฟล์ตามการตั้งค่าเซิร์ฟเวอร์</p><p class="hint">RAW ต้องเป็นข้อมูลที่เครื่องพิมพ์เข้าใจอยู่แล้ว เช่น PCL/ESC/POS การส่ง PDF เป็น RAW จะไม่แปลงไฟล์ให้</p>
+      <button id="print-button" type="submit" disabled>ส่งเข้าคิวพิมพ์</button></form>
+    </section>
+    <section class="panel"><h2>Clear Print Queue</h2><p>แก้ปัญหากระดาษติดที่เครื่องก่อน แล้วล้างงานที่ค้างในคิวที่เลือก</p><form id="clear-form"><label for="clear-printer">คิวที่ต้องการล้าง</label><select id="clear-printer" required><option value="">เชื่อมต่อก่อนใช้งาน</option></select><p class="warning">ยกเลิกทุกงานในคิวนี้ รวมงานของผู้ใช้อื่น งานที่ส่งถึงหน่วยความจำเครื่องพิมพ์แล้วอาจยังพิมพ์ต่อ</p><button id="clear-button" type="submit" class="danger" disabled>ล้างงานทั้งหมดในคิวนี้</button></form><hr><h3>เปิด-ปิดเครื่อง USB ใหม่?</h3><p>ระบบ Auto-heal จะเปิดคิวที่ Paused ให้เมื่ออุปกรณ์กลับมาเชื่อมต่อ โดยเก็บงานที่ค้างไว้ ล้างคิวเฉพาะเมื่อคุณต้องการยกเลิกงานจริงๆ</p></section>
+  </div>
+  <section class="panel"><h2>ข้อมูลจากระบบ</h2><p>คำสั่ง <code>lpstat -p -d</code> และ <code>lsusb</code> บนกล่อง Armbian</p><div class="columns"><div><h3>CUPS / default printer</h3><pre id="lpstat">—</pre></div><div><h3>USB devices</h3><pre id="lsusb">—</pre></div></div></section>
+  <footer>SCPPrint Agent · HTTP 202 หมายถึงรับเข้าคิวแล้ว สถานะพิมพ์จริงขึ้นกับ CUPS และเครื่องพิมพ์</footer>
+</main>
+</body></html>

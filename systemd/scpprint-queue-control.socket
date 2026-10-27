@@ -1,0 +1,14 @@
+[Unit]
+Description=SCPPrint local queue control socket
+
+[Socket]
+ListenStream=/run/scpprint-queue-control.sock
+SocketUser=root
+SocketGroup=scpprint
+SocketMode=0660
+Accept=yes
+MaxConnections=4
+RemoveOnStop=yes
+
+[Install]
+WantedBy=sockets.target

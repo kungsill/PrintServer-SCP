@@ -1,0 +1,24 @@
+[Unit]
+Description=SCPPrint RAW TCP 9100 receiver
+After=network.target cups.service
+Requires=cups.service
+
+[Service]
+User=scpprint
+Group=scpprint
+WorkingDirectory=/opt/scpprint
+EnvironmentFile=/etc/scpprint/raw.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 /opt/scpprint/raw.py
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/spool/scpprint
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

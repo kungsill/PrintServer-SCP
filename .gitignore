@@ -1,0 +1,5 @@
+.qa-venv/
+__pycache__/
+*.pyc
+dist/
+/SCPPrint_Setup.exe

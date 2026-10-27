@@ -1,0 +1,28 @@
+[Unit]
+Description=SCPPrint Dashboard and authenticated print agent
+After=network.target cups.service scpprint-queue-control.socket
+Requires=cups.service scpprint-queue-control.socket
+
+[Service]
+User=scpprint
+Group=scpprint
+WorkingDirectory=/opt/scpprint
+EnvironmentFile=/etc/scpprint/api.env
+EnvironmentFile=/etc/scpprint/api-bind.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 -m uvicorn api:app --host ${SCPPRINT_LISTEN} --port 8631 --workers 1 --no-proxy-headers --limit-concurrency 24
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=45
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/spool/scpprint
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LimitNOFILE=1024
+TasksMax=64
+
+[Install]
+WantedBy=multi-user.target

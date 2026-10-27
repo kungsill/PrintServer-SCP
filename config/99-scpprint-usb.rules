@@ -1,0 +1,2 @@
+# Queue repair runs outside udev. Cover printer-class and vendor-specific HP USB devices.
+ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", TAG+="systemd", ENV{SYSTEMD_WANTS}+="scpprint-usb-heal.service"

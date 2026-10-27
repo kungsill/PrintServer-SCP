@@ -1,0 +1,13 @@
+[Unit]
+Description=SCPPrint USB queue recovery
+After=cups.service
+Requires=cups.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/scpprint/usb_heal.py
+RemainAfterExit=no
+TimeoutStartSec=240
+
+[Install]
+WantedBy=multi-user.target
